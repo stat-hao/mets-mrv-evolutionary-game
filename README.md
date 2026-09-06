@@ -4,6 +4,12 @@ MATLAB implementation for **Emissions Trading and MRV Mechanism for Maritime Dec
 
 The code computes evolutionary trajectories and local equilibrium stability for four populations: governments, shipping companies, carbon-trading platforms and MRV agencies. The state vector is `[x,y,z,r]`, where each component is the population share adopting the corresponding active strategy.
 
+## Model framework and literature overview
+
+![Stakeholder interactions](figures/Fig_diagram.png)
+
+![Literature overview](figures/Fig_literature.png)
+
 ## Run all experiments
 
 Use MATLAB R2022a with base MATLAB; no additional toolbox is required. Set the repository root as the current folder and run:
