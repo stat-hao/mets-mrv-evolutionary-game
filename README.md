@@ -1,87 +1,86 @@
 # Maritime ETS–MRV evolutionary game
 
-MATLAB code and manuscript figures for **Emissions Trading and MRV Mechanism for Maritime Decarbonization: A Four-Party Evolutionary Analysis**.
+MATLAB implementation for **Emissions Trading and MRV Mechanism for Maritime Decarbonization: A Four-Party Evolutionary Analysis**.
 
-The model examines government promotion, shipping-company participation, platform innovation and MRV verification. Parameters represent illustrative scenarios rather than empirically calibrated estimates.
+The code computes evolutionary trajectories and local equilibrium stability for four populations: governments, shipping companies, carbon-trading platforms and MRV agencies. The state vector is `[x,y,z,r]`, where each component is the population share adopting the corresponding active strategy.
 
-## Model framework
+## Run all experiments
 
-![Stakeholder interactions](figures/Fig_diagram.png)
-
-[View the literature overview](figures/Fig_literature.png).
-
-## Run the numerical experiments
-
-Use MATLAB R2022a with base MATLAB. Set the repository root as the current folder and run:
+Use MATLAB R2022a with base MATLAB; no additional toolbox is required. Set the repository root as the current folder and run:
 
 ```matlab
 outputDir = run_all;
 ```
 
-The code writes PDF/PNG figures, CSV/MAT simulation data, scenario parameters and run settings to a timestamped `results/` folder. The 100-by-100 joint scan involves 10,000 ODE integrations. The uploaded manuscript figures in `figures/` are separate from newly generated results.
+This runs the four experiment scripts below and saves figures and numerical data in a timestamped `results/` folder, together with the scenario parameters and numerical settings.
 
-| Location | Contents |
-|---|---|
-| `run_all.m` | Main execution entry |
-| `config/` | Scenario parameters and numerical settings |
-| `src/` | Replicator equations, Jacobian, integration and export functions |
-| `experiments/` | Pure-scenario, sensitivity, joint-grid and mixed-population experiments |
-| `figures/` | Uploaded manuscript figures linked below |
+## Which file should I use?
 
-## Manuscript figures
-
-PDF panels are linked for viewing or downloading; the PNG framework diagram is displayed above. Labels are used instead of figure numbers to accommodate manuscript revisions.
-
-### Pure-strategy scenarios
-
-| Scenario | 3D projection | Time evolution |
+| What to calculate or change | MATLAB file | What it does |
 |---|---|---|
-| E1 (1,1,1,1) | [PDF](figures/Fig_E1a.pdf) | [PDF](figures/Fig_E1b.pdf) |
-| E2 (1,1,1,0) | [PDF](figures/Fig_E2a.pdf) | [PDF](figures/Fig_E2b.pdf) |
-| E3 (1,1,0,1) | [PDF](figures/Fig_E3a.pdf) | [PDF](figures/Fig_E3b.pdf) |
-| E8 (1,0,0,0), setting 1 | — | [PDF](figures/Fig_E8_Scenario4.pdf) |
-| E8 (1,0,0,0), setting 2 | — | [PDF](figures/Fig_E8_Scenario8.pdf) |
-| E9 (0,1,1,1) | [PDF](figures/Fig_E9a.pdf) | [PDF](figures/Fig_E9b.pdf) |
-| E16 (0,0,0,0) | [PDF](figures/Fig_E16a.pdf) | [PDF](figures/Fig_E16b.pdf) |
+| Evolutionary trajectories under the pure-equilibrium scenarios | [run_pure_scenarios.m](experiments/run_pure_scenarios.m) | Simulates E1, E2, E3, E8 (two parameter sets), E9 and E16; generates time series and the associated 3D projections |
+| Sensitivity to a parameter or initial government share | [run_sensitivity.m](experiments/run_sensitivity.m) | Runs the nine one-factor experiments for x(0), DeltaC1–DeltaC4, P1, F1, S and V; scan values are specified in this file |
+| Joint effects of initial government share and company incentives | [run_heatmaps.m](experiments/run_heatmaps.m) | Varies x(0) and P1 on a 100-by-100 grid and computes all four strategy shares at time 10 |
+| Mixed-population examples | [run_mixed_examples.m](experiments/run_mixed_examples.m) | Simulates the boundary mixed equilibrium and equilibrium-line examples |
+| View or change scenario parameters | [mets_parameters.m](config/mets_parameters.m) | Defines the seven pure-scenario configurations and two mixed-example configurations |
+| Change solver tolerances, grid resolution or random seed | [reproduction_settings.m](config/reproduction_settings.m) | Defines settings shared by the numerical experiments |
+| Evaluate active-versus-passive payoff differences | [mets_payoff_advantages.m](src/mets_payoff_advantages.m) | Computes the four payoff advantages used in the replicator equations |
+| Evaluate the replicator equations | [mets_rhs.m](src/mets_rhs.m) | Computes the derivative of `[x,y,z,r]` |
+| Calculate the Jacobian and its eigenvalues | [mets_jacobian.m](src/mets_jacobian.m) | Evaluates the analytical Jacobian numerically; use MATLAB `eig` for its eigenvalues |
+| Check a candidate equilibrium and its local stability | [classify_equilibrium.m](src/classify_equilibrium.m) | Checks the equilibrium residual and classifies the Jacobian eigenvalues; nonhyperbolic cases require further analysis |
+| Simulate a custom parameter set and initial state | [simulate_mets.m](src/simulate_mets.m) | Integrates the replicator equations using `ode45` and returns the time vector and strategy shares |
 
-The two E8 settings correspond to `E8_case1` and `E8_case2` in the code; their uploaded filenames retain the original Scenario4 and Scenario8 labels.
+## Run one experiment
 
-### Sensitivity and joint-parameter experiments
+From the repository root, initialize the paths and settings once:
 
-| Experiment | Figure |
-|---|---|
-| Initial government share | [PDF](figures/Fig_InitialWillingness.pdf) |
-| Government incremental cost, DeltaC1 | [PDF](figures/Fig_DeltaC1.pdf) |
-| Company incremental cost, DeltaC2 | [PDF](figures/Fig_DeltaC2.pdf) |
-| Platform innovation cost, DeltaC3 | [PDF](figures/Fig_DeltaC3.pdf) |
-| Strict-verification incremental cost, DeltaC4 | [PDF](figures/Fig_DeltaC4.pdf) |
-| Company incentive, P1 | [PDF](figures/Fig_P1.pdf) |
-| Company penalty, F1 | [PDF](figures/Fig_F1.pdf) |
-| Government benefit, S | [PDF](figures/Fig_S.pdf) |
-| MRV reputational benefit, V | [PDF](figures/Fig_V.pdf) |
-| Initial government share versus P1 | [PDF](figures/Fig_Heatmap_x0_P1_FourActors.pdf) |
+```matlab
+addpath('src', 'config', 'experiments');
+cfg = reproduction_settings;
+```
 
-### Mixed-population examples
+Then run the experiment you need:
 
-| Example | Figure |
-|---|---|
-| Trajectories on the boundary z = r = 0 | [PDF](figures/Fig_MixedStrategy_Trajectories.pdf) |
-| Boundary mixed equilibrium: phase diagram | [PDF](figures/Fig_MixedStrategy_PhaseDiagram.pdf) |
-| Boundary mixed equilibrium: time evolution | [PDF](figures/Fig_MixedStrategy_TimeTrajectories.pdf) |
-| Equilibrium-line point: phase diagram | [PDF](figures/Fig_MixedStrategy_PhaseDiagram-stable.pdf) |
-| Equilibrium-line point: time evolution | [PDF](figures/Fig_MixedStrategy_TimeTrajectories-stable.pdf) |
+```matlab
+% Pure-equilibrium scenarios
+run_pure_scenarios(fullfile('results','pure'), cfg);
 
-The uploaded filenames retain the original `-stable` suffix. The corresponding point (1,0.4213,0,0) lies on an equilibrium line; it is not an isolated asymptotically stable attractor. The code names these outputs `EquilibriumLine_*`. The boundary point (1/3,2/3,0,0) is unstable in the full four-dimensional system. Exact-equilibrium time-series plots alone do not establish attraction.
+% One-factor sensitivity experiments
+run_sensitivity(fullfile('results','sensitivity'), cfg);
 
-## Reproduction settings
+% Joint x(0)-P1 experiment: 10,000 ODE integrations
+run_heatmaps(fullfile('results','heatmaps'), cfg);
 
-State order is `[x,y,z,r]`: government, shipping companies, platforms and MRV agencies. Each entry denotes an active-strategy population share. The solver is `ode45`, with `RelTol=1e-8`, `AbsTol=1e-10` and `MaxStep=0.25`; standard trajectories use 501 output times. Model time is not calendar time.
+% Mixed-population examples
+run_mixed_examples(fullfile('results','mixed'), cfg);
+```
 
-- **Pure scenarios:** 3D panels use 125 initial conditions, with five values each for x,y in [0.01,0.99] and z in [0.1,0.99], and r=0.5, over [0,50]. Time-series panels start at [0.01,0.99,0.99,0.99], over [0,20].
-- **Sensitivity:** baseline `E8_case1`, initial shares 0.5 and horizon [0,10], varying only the indicated parameter or initial government share.
-- **Joint grid:** the same baseline, 100 values each for x(0) in [0,1] and P1 in [0,10]. Outputs are shares at time 10, not equilibrium classifications.
-- **Mixed-boundary trajectories:** ten initial points on z=r=0, random seed 252, and horizon [0,50].
+Each function saves its figures and data in the specified folder. Initial states and time horizons are defined in the corresponding experiment script. Reusing an output folder overwrites files with the same names; `run_all` creates a new folder for each run.
 
-The common pure-panel initial conditions and random seed are documented reconstruction choices: the original scripts did not preserve every panel's initial conditions or the original random seed. Accordingly, exact recovery of every uploaded curve is not claimed. Compare generated results with the final manuscript using the stated settings.
+## Check an equilibrium or calculate a custom trajectory
 
-The minimal code package passed static MATLAB R2022a syntax checks. Native MATLAB execution was not performed in the packaging environment.
+After the path initialization above:
+
+```matlab
+% Load a scenario and check the candidate E1 equilibrium
+p = mets_parameters('E1');
+uStar = [1; 1; 1; 1];
+info = classify_equilibrium(uStar, p);
+disp(info.status);
+disp(info.eigenvalues);
+
+% Integrate from a chosen initial population distribution
+u0 = [0.2; 0.4; 0.6; 0.8];
+s = simulate_mets(p, u0, [0 20], cfg);
+% s.t: time vector; s.u: columns x, y, z, r
+```
+
+Available scenario identifiers are `E1`, `E2`, `E3`, `E8_case1`, `E8_case2`, `E9`, `E16`, `mixed_boundary` and `mixed_line`. For a custom scenario, load one configuration and change its fields, for example `p.P1 = 2`, before calling `simulate_mets`.
+
+## Interpretation and reproducibility
+
+Parameters are illustrative scenario assumptions, not empirical estimates. Model time is not calendar time, and finite-time strategy shares are not automatically equilibrium outcomes. The boundary point (1/3,2/3,0,0) is unstable in the full system; (1,0.4213,0,0) belongs to an equilibrium line rather than an isolated asymptotically stable attractor.
+
+Common pure-panel initial conditions and random seed 252 are documented reconstruction choices because the original scripts did not preserve every panel's initial conditions or random seed. Exact recovery of every original curve is therefore not claimed. The package passed static MATLAB R2022a syntax checks; native MATLAB execution was not performed in the packaging environment.
+
+Uploaded manuscript illustrations are available in [figures/](figures/). Newly computed results are saved separately in `results/`.
